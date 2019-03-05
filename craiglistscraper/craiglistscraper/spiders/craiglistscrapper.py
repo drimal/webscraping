@@ -1,37 +1,51 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from craiglistscraper.items import craiglistscraperItem
 
-class CraiglistscrapperSpider(scrapy.Spider):
+class CraiglistscraperSpider(scrapy.Spider):
     name = 'craiglistscrapper'
     allowed_domains = ['craigslist.org']
-    start_urls = ['https://chicago.craigslist.org/d/apts-housing-for-rent/search/apa/']
+    base_url = 'https://chicago.craigslist.org/search/see/apa?'
+    start_urls = []
+
+    for page in range(0,10):
+        start_urls.append(base_url+'s='+ str(120*page))
 
     def parse(self, response):
-        #Now parse the response
-        date = response.css(".result-date::text").getall()
-        title = response.css(".result-title.hdrlnk::text").getall()
-        bedrooms = response.css("span[class=result-meta] .housing::text").getall()
-        price = response.css('span[class=result-meta] .result-price::text').getall()
-        neighborhood = response.css("span[class=result-meta] .result-hood::text").getall()
-        has_map = response.css("span[class=result-meta] .maptag::text").getall()
-        has_pics = response.css("span[class=result-meta] .result-tags::text").getall()
-        # convert extracted content row wise
-        scraped_info = {}
-        for item in zip(date,title,bedrooms,price,neighborhood,has_map,has_pics):
-            scraped_info = {
-                    'Date' : item[0],
-                    'title' : item[1],
-                    'bedrooms': item[2],
-                    'price' : item[3],
-                    'neighborhood' : item[4],
-                    'has_map' : item[5],
-                    'has_pics' : item[6]
-                    }
-            yield scraped_info
+        # Get listings from the response
+        postings = response.xpath(".//p")
         
-        for i in range(5):
-            page_ct = 120*(i+1)
-            next_page = '/search/apa?s=%d' %page_ct
-            next_page = response.urljoin(next_page)
-            print(next_page)
-            yield scrapy.Request(next_page, callback = self.parse)
+        for i in range(len(postings)):
+            item = craiglistscraperItem()
+            item['postid'] = int("".join(postings[i].xpath(".//@data-id").extract()))
+            item['title'] = "".join(postings[i].xpath(".//*[@class='result-title hdrlnk']/text()").extract())
+            item['postdate'] = "".join(postings[i].xpath(".//*[@class='result-date']/text()").extract())
+            item['link'] = "".join(postings[i].xpath(".//*[contains(@class, 'result-title hdrlnk')]/@href").extract())
+            item['price'] = "".join(postings[i].xpath(".//span[@class='result-meta']/span[@class='result-price']/text()").extract())          
+            
+            # parsing response to follow the posting link for more detailed information
+            follow = item['link']
+            
+            request = scrapy.Request(follow, callback=self.parse_from_item_detail_page)
+            request.meta['item'] = item
+            yield request
+    
+    def parse_from_item_detail_page(self, response):
+        item = response.meta['item']
+        latparser = response.xpath("//div[contains(@id,'map')]")
+        item['latitude'] = ''.join(latparser.xpath("@data-latitude").extract())
+        item['longitude'] = ''.join(latparser.xpath("@data-longitude").extract())
+        
+        #extract attributes of the listing 
+        attr = response.xpath("//p[@class='attrgroup']")
+        attributes = attr.xpath("span/b/text()").extract()
+        try: 
+            item['beds'] = attributes[0]
+            item['baths'] = attributes[1]
+            item['area'] = attributes[2]
+            item['others'] = attr.xpath("span/text()").extract()[2:]
+        except:
+            pass 
+        return item
+        
+    
