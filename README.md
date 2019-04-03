@@ -32,9 +32,7 @@ Now go to MYPROJECT directory and create a spider.
 
 `scrapy genspider craiglistscraper https://chicago.craigslist.org/search/see/apa?`
 
-This will create a new spider “craiglistscraper.py” in /spiders folder with a basic template:
-
-
+This will create a new spider “craiglistscraper.py” in /spiders folder with a basic template. Details on craiglistscraper/spiders/craiglistscrapper.py
 
 
 
