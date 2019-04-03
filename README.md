@@ -4,11 +4,12 @@ In this webscraping project, I used scrapy to scrap apt/housing data from the ci
 
 # Starting a project:
 Before scraping, we will have to set up a new Scrapy project. Enter a directory where you’d like to store your code and run:
+
 `scrapy startproject MYPROJECT`
 
 This will create MYPROJECT directory with following content:
 
-MYPROJECT/
+         MYPROJECT/
          
          -scrapy.cfg   #deploy config file
          
@@ -27,8 +28,13 @@ MYPROJECT/
   
   
 Now go to MYPROJECT directory and create a spider. 
+# Generating Spider
 
-scrapy genspider craiglistspider   
+`scrapy genspider craiglistscraper https://chicago.craigslist.org/search/see/apa?`
+
+This will create a new spider “craiglistscraper.py” in /spiders folder with a basic template:
+
+
 
 
 
