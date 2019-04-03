@@ -21,8 +21,8 @@ class CraiglistscraperSpider(scrapy.Spider):
             item['title'] = "".join(postings[i].xpath(".//*[@class='result-title hdrlnk']/text()").extract())
             item['postdate'] = "".join(postings[i].xpath(".//*[@class='result-date']/text()").extract())
             item['link'] = "".join(postings[i].xpath(".//*[contains(@class, 'result-title hdrlnk')]/@href").extract())
-            item['price'] = "".join(postings[i].xpath(".//span[@class='result-meta']/span[@class='result-price']/text()").extract())          
-            
+            price = "".join(postings[i].xpath(".//span[@class='result-meta']/span[@class='result-price']/text()").extract()).replace('$', '')
+            item['price'] = float(price)
             # parsing response to follow the posting link for more detailed information
             follow = item['link']
             
@@ -40,9 +40,9 @@ class CraiglistscraperSpider(scrapy.Spider):
         attr = response.xpath("//p[@class='attrgroup']")
         attributes = attr.xpath("span/b/text()").extract()
         try: 
-            item['beds'] = attributes[0]
-            item['baths'] = attributes[1]
-            item['area'] = attributes[2]
+            item['beds'] = int(attributes[0].str.replace('BR', ''))
+            item['baths'] = int(attributes[1].str.replace('Ba', ''))
+            item['area'] = float(attributes[2])
             item['others'] = attr.xpath("span/text()").extract()[2:]
         except:
             pass 
