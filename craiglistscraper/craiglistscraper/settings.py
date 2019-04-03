@@ -15,9 +15,14 @@ SPIDER_MODULES = ['craiglistscraper.spiders']
 NEWSPIDER_MODULE = 'craiglistscraper.spiders'
 
 # Export as csv feed
-FEED_FORMAT = "csv"
-FEED_URI = "chicago_craiglist_housing.csv"
+FEED_FORMAT = "json"
+FEED_URI = "./data/chicago_craiglist_housing.json"
 
+MONGO_URI = "mongodb://localhost:27017"
+MONGO_DATABASE = "cglistings"
+
+#MONGO_URI="mongodb+srv://drimal:05152012@cluster0-jxt6i.mongodb.net/test?retryWrites=true"
+#MONGO_DATABASE="cglistings"
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'craiglistscraper (+http://www.yourdomain.com)'
 
@@ -67,9 +72,9 @@ DOWNLOAD_DELAY = 3
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'craiglistscraper.pipelines.CraiglistscraperPipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'craiglistscraper.pipelines.CraiglistscraperPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
