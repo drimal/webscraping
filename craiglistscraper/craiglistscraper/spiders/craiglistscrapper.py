@@ -14,7 +14,7 @@ class CraiglistscraperSpider(scrapy.Spider):
     def parse(self, response):
         # Get listings from the response
         postings = response.xpath(".//p")
-        
+
         for i in range(len(postings)):
             item = craiglistscraperItem()
             item['postid'] = int("".join(postings[i].xpath(".//@data-id").extract()))
@@ -25,27 +25,25 @@ class CraiglistscraperSpider(scrapy.Spider):
             item['price'] = float(price)
             # parsing response to follow the posting link for more detailed information
             follow = item['link']
-            
+
             request = scrapy.Request(follow, callback=self.parse_from_item_detail_page)
             request.meta['item'] = item
             yield request
-    
+
     def parse_from_item_detail_page(self, response):
         item = response.meta['item']
         latparser = response.xpath("//div[contains(@id,'map')]")
         item['latitude'] = ''.join(latparser.xpath("@data-latitude").extract())
         item['longitude'] = ''.join(latparser.xpath("@data-longitude").extract())
-        
-        #extract attributes of the listing 
+
+        #extract attributes of the listing
         attr = response.xpath("//p[@class='attrgroup']")
         attributes = attr.xpath("span/b/text()").extract()
-        try: 
-            item['beds'] = int(attributes[0].str.replace('BR', ''))
-            item['baths'] = int(attributes[1].str.replace('Ba', ''))
+        try:
+            item['beds'] = float(attributes[0].replace('BR', ''))
+            item['baths'] = float(attributes[1].replace('Ba', ''))
             item['area'] = float(attributes[2])
             item['others'] = attr.xpath("span/text()").extract()[2:]
         except:
-            pass 
+            pass
         return item
-        
-    
