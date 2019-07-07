@@ -34,5 +34,9 @@ Now go to MYPROJECT directory and create a spider.
 
 This will create a new spider “craiglistscraper.py” in /spiders folder with a basic template. Details on craiglistscraper/spiders/craiglistscrapper.py
 
+# Running Spider
+
+`scrapy crawl craiglistscraper`
+
 
 
